@@ -518,6 +518,7 @@
         <h3><i class="fas fa-file-upload"></i> Upload Asset Pack to Vault (Files)</h3>
         <input type="text" id="newFileName" placeholder="File / Bundle Name">
         <input type="text" id="newFileImg" placeholder="Display Image URL">
+        <textarea id="newFileDesc" rows="2" placeholder="Tool Specifications / Description..."></textarea>
         <input type="text" id="newFileUrl" placeholder="Download Matrix Redirect URL">
         <input type="text" id="newFileVideoUrl" placeholder="YouTube Setup Video URL (Optional)">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -586,6 +587,7 @@
     { 
       name: "System Boilerplate Core V3.zip", 
       img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600", 
+      desc: "Verified Source Pack Bundle Core Sequence Asset.",
       url: "#", 
       videoUrl: "https://youtube.com",
       size: "24MB", 
@@ -594,6 +596,7 @@
     { 
       name: "Vector Assets Matrix Pack.rar", 
       img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=600", 
+      desc: "High quality vector asset layout kit modules.",
       url: "#", 
       videoUrl: "",
       size: "105MB", 
@@ -743,7 +746,7 @@
               <span class="meta-badge">${escapeHtml(f.size || 'N/A')}</span>
             </div>
             <h3>${escapeHtml(f.name)}</h3>
-            <p>Verified Source Pack Bundle Core Sequence Asset.</p>
+            <p>${escapeHtml(f.desc || 'Premium Tool Asset Pack Package Sequence.')}</p>
           </div>
           <div class="card-btn-group">
             ${videoBtnHtml}
@@ -890,13 +893,14 @@
   document.getElementById("addFileBtn").onclick = () => {
     const name = document.getElementById("newFileName").value.trim();
     const img = document.getElementById("newFileImg").value.trim();
+    const desc = document.getElementById("newFileDesc").value.trim();
     const url = document.getElementById("newFileUrl").value.trim();
     const videoUrl = document.getElementById("newFileVideoUrl").value.trim();
     const size = document.getElementById("newFileSize").value.trim() || "N/A";
     const type = document.getElementById("newFileType").value.trim() || "DATA";
     
     if(name && url) {
-      downloadFiles.push({ name, img, url, videoUrl, size, type });
+      downloadFiles.push({ name, img, desc: desc || "Premium Tool Asset Pack Package Sequence.", url, videoUrl, size, type });
       localStorage.setItem("n_fl", JSON.stringify(downloadFiles)); 
       renderFiles();
       renderAdminManagementLists();
@@ -905,6 +909,7 @@
       // Reset Fields
       document.getElementById("newFileName").value = ""; 
       document.getElementById("newFileImg").value = ""; 
+      document.getElementById("newFileDesc").value = "";
       document.getElementById("newFileUrl").value = ""; 
       document.getElementById("newFileVideoUrl").value = "";
       document.getElementById("newFileSize").value = ""; 
@@ -995,4 +1000,4 @@
   };
 </script>
 </body>
-  </html>
+</html>
