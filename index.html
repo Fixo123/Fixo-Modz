@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Fixo Modz</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ---- [RESET & VARIABLES] ---- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root, [data-theme="dark"] {
+      --bg-dark: #0A0A0C;
+      --bg-card: #121216;
+      --bg-input: #1A1A22;
+      --accent: #FFD700;       
+      --accent-glow: rgba(255, 215, 0, 0.35);
+      --text-main: #EFF3FC;
+      --text-muted: #8A8F9C;
+      --border-color: #26262E;
+      --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      --danger: #FF4D4D;
+    }
+
+    [data-theme="light"] {
+      --bg-dark: #F4F5F7;
+      --bg-card: #FFFFFF;
+      --bg-input: #E4E6EB;
+      --accent: #FF8C00;       
+      --accent-glow: rgba(255, 140, 0, 0.25);
+      --text-main: #1A1A22;
+      --text-muted: #65676B;
+      --border-color: #CCD0D5;
+      --danger: #D93838;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ---- [PARTICLES BACKGROUND EFFECT] ---- */
+    #particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .particle {
+      position: absolute;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.8;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% {
+        transform: translateY(105vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* ---- [PRELOADER] ---- */
+    .preloader {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #050507;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    .preloader.hide {
+      transform: scale(1.1);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .preloader-content { text-align: center; position: relative; }
+    .preloader-logo { font-size: 3.5rem; font-weight: 800; color: #fff; font-family: 'Space Grotesk', sans-serif; letter-spacing: 6px; margin-bottom: 1.5rem; }
+    .preloader-logo span { color: var(--accent); text-shadow: 0 0 25px var(--accent-glow); }
+    .loader-circle { width: 60px; height: 60px; border: 3px solid rgba(255,215,0,0.1); border-radius: 50%; border-top-color: var(--accent); margin: 1.5rem auto; animation: spinLoader 1s linear infinite; box-shadow: 0 0 15px var(--accent-glow); }
+    @keyframes spinLoader { to { transform: rotate(360deg); } }
+
+    /* ---- [GATEKEEPER] ---- */
+    .gatekeeper {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 5, 6, 0.9);
+      backdrop-filter: blur(25px);
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: var(--transition-smooth);
+    }
+    .gatekeeper.hide { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.05); }
+    .lock-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 2rem; padding: 3rem 2rem; width: 90%; max-width: 540px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+    .lock-icon { font-size: 3.5rem; color: var(--accent); margin-bottom: 1.5rem; }
+    .lock-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2.2rem; margin-bottom: 0.8rem; }
+    .lock-card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2.5rem; }
+    .subscribe-row { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+    .sub-btn { padding: 1rem; border-radius: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none; color: #000; background: var(--accent); transition: var(--transition-smooth); }
+    .sub-btn.whatsapp { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+    .sub-btn:hover { transform: translateY(-3px); }
+    .verify-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 1rem; font-weight: 700; font-size: 1rem; border-radius: 12px; width: 100%; cursor: pointer; transition: var(--transition-smooth); }
+    .verify-btn:hover { background: var(--accent); color: #000; }
+
+    /* ---- [WELCOME FULL SCREEN POPUP] ---- */
+    .welcome-popup {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(5, 5, 6, 0.95);
+      z-index: 1005;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-smooth);
+    }
+    .welcome-popup.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .welcome-card {
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 24px;
+      width: 90%;
+      max-width: 650px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 50px var(--accent-glow);
+      transform: scale(0.8);
+      transition: var(--transition-smooth);
+    }
+    .welcome-popup.show .welcome-card {
+      transform: scale(1);
+    }
+    .welcome-close-btn {
+      position: absolute;
+      top: 15px; right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .welcome-close-btn:hover { color: var(--accent); }
+    .welcome-banner {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+    .welcome-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .welcome-card h2 span { color: var(--accent); }
+    .welcome-card p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .welcome-continue-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 5px 15px var(--accent-glow);
+    }
+    .welcome-continue-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--accent-glow);
+    }
+
+    /* ---- [TOP NAVIGATION BAR] ---- */
+    .top-navbar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+      background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; padding: 0 2rem; z-index: 95;
+    }
+    .menu-toggle-trigger {
+      background: transparent; border: none; color: var(--text-main);
+      font-size: 1.5rem; cursor: pointer; margin-right: 1.5rem;
+      transition: var(--transition-smooth);
+    }
+    .menu-toggle-trigger:hover { color: var(--accent); }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; }
+    .nav-logo span { color: var(--accent); }
+
+    /* ---- [SLIDE SIDEBAR MENU] ---- */
+    .sidebar {
+      position: fixed; top: 0; left: -280px;
+      width: 280px; height: 100vh;
+      background: var(--bg-card); border-right: 1px solid var(--border-color);
+      padding: 2rem 1.5rem; display: flex; flex-direction: column;
+      justify-content: space-between; z-index: 100;
+      transition: cubic-bezier(0.25, 1, 0.5, 1) 0.5s;
+    }
+    .sidebar.open { left: 0; box-shadow: 50px 0 100px rgba(0,0,0,0.5); }
+    
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+    .close-menu-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+    .close-menu-btn:hover { color: var(--accent); }
+
+    .nav-links { display: flex; flex-direction: column; gap: 0.8rem; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 1rem;
+      padding: 0.8rem 1.2rem; border-radius: 12px; transition: var(--transition-smooth);
+      cursor: pointer; display: flex; align-items: center; gap: 15px;
+    }
+    .nav-links a:hover { color: var(--text-main); background: var(--bg-input); }
+    .nav-links a.active { color: #000; background: var(--accent); font-weight: 600; }
+
+    .menu-utils { border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+    .theme-toggle-btn {
+      width: 100%; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-color);
+      background: var(--bg-input); color: var(--text-main); font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+
+    .sidebar-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      z-index: 99; opacity: 0; visibility: hidden; transition: var(--transition-smooth);
+    }
+    .sidebar-overlay.visible { opacity: 1; visibility: visible; }
+
+    /* ---- [MAIN APP WRAPPER] ---- */
+    .main-app {
+      padding-top: 70px;
+      min-height: 100vh; opacity: 0; visibility: hidden;
+      transform: translateY(10px); transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .main-app.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    /* ---- [SECTIONS ARCHITECTURE] ---- */
+    .section { display: none; padding: 4rem; max-width: 1200px; margin: 0 auto; }
+    .section.active-section { display: block; animation: sectionReveal 0.5s ease forwards; }
+    @keyframes sectionReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1.5rem; }
+    .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; }
+    .section-title span { color: var(--accent); }
+
+    /* SEARCH BOX */
+    .search-box-container { position: relative; width: 100%; max-width: 350px; }
+    .search-box-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-input { width: 100%; padding: 0.8rem 1rem 0.8rem 2.8rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: var(--transition-smooth); }
+    .search-input:focus { border-color: var(--accent); }
+
+    /* ---- [HOME HUB GRID] ---- */
+    .home-grid { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start; }
+    .slider-container { width: 100%; border-radius: 24px; overflow: hidden; aspect-ratio: 16 / 9; position: relative; border: 1px solid var(--border-color); }
+    .slider { display: flex; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+    .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center; }
+
+    /* CIRCLE PROFILE AVATAR */
+    .profile-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 2.5rem 1.5rem; text-align: center; }
+    .circle-avatar-container { position: relative; width: 150px; height: 150px; margin: 0 auto 1.5rem; }
+    .circle-avatar-container::before { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border: 3px dashed var(--accent); border-radius: 50%; animation: spinRing 12s linear infinite; }
+    .circle-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg-card); position: relative; z-index: 2; }
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+
+    .bio-box { grid-column: 1 / -1; background: var(--bg-card); border-radius: 20px; padding: 2rem; border: 1px solid var(--border-color); margin-top: 1rem; }
+    .bio-box h2 { font-family: 'Space Grotesk', sans-serif; margin-bottom: 0.8rem; }
+    .bio-box p { color: var(--text-muted); line-height: 1.6; }
+
+    /* ---- [CARDS DESIGN & BADGES] ---- */
+    .dynamic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+    .premium-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem; transition: var(--transition-smooth); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    .premium-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    
+    /* MODIFIED: YouTube Thumbnail Ratio for Tools */
+    .card-banner-img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; margin-bottom: 1.2rem; border: 1px solid var(--border-color); }
+    
+    /* MODIFIED: Dynamic Store Image Responsiveness */
+    .store-banner-img { width: 100%; max-height: 220px; object-fit: contain; background: rgba(0, 0, 0, 0.15); border-radius: 12px; margin-bottom: 1.2rem; border: 1px solid var(--border-color); }
+
+    .badge-container { display: flex; gap: 8px; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .meta-badge { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color); }
+    .meta-badge.type-badge { background: rgba(255, 215, 0, 0.1); color: var(--accent); border-color: rgba(255, 215, 0, 0.2); }
+    .meta-badge.price-badge { background: #25D366; color: #fff; border: none; }
+
+    .premium-card h3 { font-family: 'Space Grotesk', sans-serif; margin-bottom: 0.5rem; font-size: 1.25rem; }
+    .premium-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5; }
+    
+    /* Button Layout adjustments for dual action cards */
+    .card-btn-group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .card-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.9rem; }
+    .card-btn.yt-btn { background: rgba(255, 77, 77, 0.1); border-color: rgba(255, 77, 77, 0.2); color: #FF4D4D; }
+    .card-btn.yt-btn:hover { background: #FF4D4D; color: #fff; border-color: #FF4D4D; }
+    .premium-card:hover .card-btn:not(.yt-btn) { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* CODE CONTAINER STYLE */
+    .code-wrapper { background: #050507; border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem; position: relative; }
+    .code-block pre { overflow-x: auto; font-family: monospace; color: #A4F4B3; line-height: 1.6; }
+    .copy-code-btn { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; }
+
+    /* ---- [ADMIN PANEL DESIGN] ---- */
+    .admin-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 2.5rem; max-width: 700px; margin: 0 auto 2rem; }
+    .admin-form label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
+    .admin-form input, .admin-form textarea { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); padding: 0.9rem; border-radius: 10px; color: var(--text-main); margin-bottom: 1.2rem; outline: none; }
+    .admin-form button { background: var(--accent); color: #000; font-weight: 700; border: none; padding: 0.9rem 2rem; border-radius: 10px; cursor: pointer; transition: var(--transition-smooth); }
+    .admin-form button:hover { transform: translateY(-2px); }
+
+    /* ADMIN ITEM MANAGEMENT LIST */
+    .admin-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+    .admin-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 0.8rem 1.2rem; border-radius: 10px; border: 1px solid var(--border-color); }
+    .admin-list-item span { font-weight: 500; font-size: 0.95rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 70%; }
+    .delete-item-btn { background: var(--danger) !important; color: #fff !important; padding: 0.5rem 1rem !important; font-size: 0.85rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+    /* ---- [FLOATING SUPPORT WIDGET WITH ANIMATIONS] ---- */
+    .support-widget { position: fixed; bottom: 30px; right: 30px; z-index: 99; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+    .support-btn { 
+      width: 60px; height: 60px; border-radius: 50%; 
+      background: #25D366; color: white; 
+      display: flex; justify-content: center; align-items: center; 
+      font-size: 1.8rem; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4); 
+      cursor: pointer; transition: var(--transition-smooth); text-decoration: none; 
+      position: relative;
+    }
+    .support-btn.telegram { 
+      background: #0088cc; 
+      box-shadow: 0 10px 25px rgba(0, 136, 204, 0.4); 
+      animation: pulseGlow 2s infinite;
+    }
+    .support-btn:hover { transform: scale(1.15) rotate(10deg); }
+    
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(0, 136, 204, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 136, 204, 0); }
+    }
+
+    /* TOAST ALERTS SYSTEM */
+    .toast-msg { position: fixed; bottom: 30px; left: 30px; background: var(--accent); color: #000; padding: 1rem 2rem; border-radius: 12px; font-weight: 700; z-index: 10000; box-shadow: 0 15px 30px rgba(0,0,0,0.2); animation: toastIn 0.3s ease forwards; }
+    @keyframes toastIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    footer { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.85rem; }
+
+    @media (max-width: 768px) {
+      .home-grid { grid-template-columns: 1fr; }
+      .section { padding: 2rem 1.5rem; }
+      .section-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="particle-container"></div>
+
+<div class="preloader" id="preloader">
+  <div class="preloader-content">
+    <div class="preloader-logo">⚡ FIXO <span>MODZ</span></div>
+    <div class="loader-circle"></div>
+  </div>
+</div>
+
+<div class="gatekeeper" id="gatekeeper">
+  <div class="lock-card">
+    <div class="lock-icon"><i class="fas fa-user-shield"></i></div>
+    <h2>CREATOR'S VAULT</h2>
+    <p>Unlock ultimate developer resources & premium asset kits.</p>
+    <div class="subscribe-row">
+      <a href="https://youtube.com/@fixo_modz" target="_blank" class="sub-btn"><i class="fab fa-youtube"></i> Subscribe on YouTube</a>
+      <a href="https://whatsapp.com/channel/0029VbAbJCO35fLy2OzH9y1I" target="_blank" class="sub-btn whatsapp"><i class="fab fa-whatsapp"></i> Join WhatsApp Channel</a>
+    </div>
+    <button class="verify-btn" id="verifyUnlockBtn"><i class="fas fa-key"></i> VERIFY & ACCESS</button>
+  </div>
+</div>
+
+<div class="welcome-popup" id="welcomePopup">
+  <div class="welcome-card">
+    <button class="welcome-close-btn" id="closeWelcomePopupBtn"><i class="fas fa-times"></i></button>
+    <img src="https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2a81ce957_5d8a3b6a20467cccfd95843d2f5d433c.jpg" alt="Welcome Banner" class="welcome-banner" id="welcomePopupImg">
+    <h2>WELCOME TO <span>FIXO MODZ</span></h2>
+    <button class="welcome-continue-btn" id="continueWelcomeBtn">PROCEED TO PANEL</button>
+  </div>
+</div>
+
+<div class="top-navbar">
+  <button class="menu-toggle-trigger" id="openMenuBtn"><i class="fas fa-bars"></i></button>
+  <div class="nav-logo">◈ FIXO <span>/ MODZ</span></div>
+</div>
+
+<div class="sidebar-overlay" id="menuOverlay"></div>
+
+<div class="sidebar" id="sidebarMenu">
+  <div>
+    <div class="sidebar-header">
+      <div class="nav-logo">◈ FIXO <span>MODZ</span></div>
+      <button class="close-menu-btn" id="closeMenuBtn"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="nav-links">
+      <a data-section="home" class="active"><i class="fas fa-house"></i> <span>Home</span></a>
+      <a data-section="downloads"><i class="fas fa-cloud-download-alt"></i> <span>Tools</span></a>
+      <a data-section="sourcecodes"><i class="fas fa-code"></i> <span>Codes</span></a>
+      <a data-section="store"><i class="fas fa-shopping-bag"></i> <span>Store</span></a>
+      <a data-section="adminlogin"><i class="fas fa-sliders"></i> <span>Admin</span></a>
+    </div>
+  </div>
+  <div class="menu-utils">
+    <button class="theme-toggle-btn" id="themeToggleBtn">
+      <i class="fas fa-moon" id="themeIcon"></i> <span>Switch Mode</span>
+    </button>
+  </div>
+</div>
+
+<div class="support-widget">
+  <a href="https://t.me/YourTelegramUsername" target="_blank" class="support-btn telegram" title="Join Telegram Channel"><i class="fab fa-telegram-plane"></i></a>
+  <a href="https://wa.me/94703945265" target="_blank" class="support-btn" title="Chat on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+</div>
+
+<div class="main-app" id="mainApp">
+  
+  <div id="homeSection" class="section active-section">
+    <div class="home-grid">
+      <div class="slider-container">
+        <div class="slider" id="slider"></div>
+      </div>
+      
+      <div class="profile-card">
+        <div class="circle-avatar-container">
+          <img src="" alt="Avatar" class="circle-avatar" id="homeAvatarImg">
+        </div>
+        <h3>Fixo Xd.</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px;">Graphic Designer & Developer</p>
+      </div>
+
+      <div class="bio-box">
+        <h2><i class="fas fa-terminal" style="color: var(--accent);"></i> My Details</h2>
+        <p>Welcome to my website My name is Fixo Xd. I'm 17+years old. I am Graphic designer,Web developer and Tool creator I have 3 year experience for this feild.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="downloadsSection" class="section">
+    <div class="header-wrapper">
+      <h2 class="section-title">Tool <span>Vault</span></h2>
+      <div class="search-box-container">
+        <i class="fas fa-search"></i>
+        <input type="text" id="vaultSearch" class="search-input" placeholder="Search files by name...">
+      </div>
+    </div>
+    <div class="dynamic-grid" id="filesContainer"></div>
+  </div>
+
+  <div id="sourcecodesSection" class="section">
+    <h2 class="section-title">Matrix <span>Snippets</span></h2>
+    <div class="code-wrapper" id="codeBlockContainer"></div>
+  </div>
+
+  <div id="storeSection" class="section">
+    <div class="header-wrapper">
+      <h2 class="section-title">Digital <span>Store</span></h2>
+      <div class="search-box-container">
+        <i class="fas fa-search"></i>
+        <input type="text" id="storeSearch" class="search-input" placeholder="Search items...">
+      </div>
+    </div>
+    <div class="dynamic-grid" id="storeContainer"></div>
+  </div>
+
+  <div id="adminloginSection" class="section">
+    <h2 class="section-title">System <span>Console</span></h2>
+    
+    <div id="adminLoginPanel" class="admin-container">
+      <div class="admin-form">
+        <label>ENTER COMPLIANCE ACCESS CODE</label>
+        <input type="password" id="adminPassInput" placeholder="••••••••••••">
+        <button id="adminAuthBtn">INITIALIZE TERMINAL</button>
+      </div>
+    </div>
+
+    <div id="adminDashboardPanel" style="display: none;" class="admin-container">
+      <div class="admin-form">
+        <h3><i class="fas fa-file-upload"></i> Upload Asset Pack to Vault (Files)</h3>
+        <input type="text" id="newFileName" placeholder="File / Bundle Name">
+        <input type="text" id="newFileImg" placeholder="Display Image URL">
+        <input type="text" id="newFileUrl" placeholder="Download Matrix Redirect URL">
+        <input type="text" id="newFileVideoUrl" placeholder="YouTube Setup Video URL (Optional)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label>FILE SIZE</label>
+            <input type="text" id="newFileSize" placeholder="e.g. 15MB, 1.2GB">
+          </div>
+          <div>
+            <label>FILE TYPE</label>
+            <input type="text" id="newFileType" placeholder="e.g. ZIP, RAR">
+          </div>
+        </div>
+        <button id="addFileBtn">Push File Package</button>
+        
+        <!-- Manage Files List -->
+        <h4 style="margin-top: 1rem; color: var(--accent);">Manage Uploaded Files:</h4>
+        <div class="admin-list" id="adminFilesList"></div>
+        
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+        
+        <h3><i class="fas fa-plus-circle"></i> Inject Store Provision</h3>
+        <input type="text" id="newItemName" placeholder="Product Title">
+        <input type="text" id="newItemImg" placeholder="Product Image URL">
+        <input type="text" id="newItemPrice" placeholder="Value (e.g. $19 / Free)">
+        <textarea id="newItemDesc" rows="2" placeholder="Brief functional specifications..."></textarea>
+        <button id="addStoreItemBtn">Deploy Store Product</button>
+        
+        <!-- Manage Store List -->
+        <h4 style="margin-top: 1rem; color: var(--accent);">Manage Store Products:</h4>
+        <div class="admin-list" id="adminStoreList"></div>
+        
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+        <h3><i class="fas fa-user-gear"></i> Update Home Circle Profile Image</h3>
+        <input type="text" id="newAvatarUrl" placeholder="Paste Direct Image Link URL">
+        <button id="updateAvatarBtn">Commit Avatar Identity</button>
+
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+        
+        <h3><i class="fas fa-code-branch"></i> Live Code Stream Update</h3>
+        <textarea id="codeSnippetInput" rows="6" placeholder="Paste structural script..."></textarea>
+        <button id="updateCodeBtn">Synchronize Script Matrix</button>
+        
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+        
+        <h3><i class="fas fa-images"></i> Slider Array Relays</h3>
+        <input id="imgUrl1" placeholder="Slide Array Image 1">
+        <input id="imgUrl2" placeholder="Slide Array Image 2">
+        <input id="imgUrl3" placeholder="Slide Array Image 3">
+        <button id="updateSliderBtn">Commit Optics Grid</button>
+        
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+        
+        <h3><i class="fas fa-window-maximize"></i> Update Welcome Popup Image</h3>
+        <input id="newPopupImgUrl" placeholder="Welcome Popup Image URL">
+        <button id="updatePopupImgBtn">Save Welcome Image</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>© FIXO MODZ // DEVELOPED BY FIXO XD.</footer>
+</div>
+
+<script>
+  let downloadFiles = [
+    { 
+      name: "System Boilerplate Core V3.zip", 
+      img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600", 
+      url: "#", 
+      videoUrl: "https://youtube.com",
+      size: "24MB", 
+      type: "ZIP" 
+    },
+    { 
+      name: "Vector Assets Matrix Pack.rar", 
+      img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=600", 
+      url: "#", 
+      videoUrl: "",
+      size: "105MB", 
+      type: "RAR" 
+    }
+  ];
+
+  let storeItems = [
+    { 
+      name: "Cyberpunk UI Framework Blueprint", 
+      img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600", 
+      price: "$19", 
+      desc: "Production ready NextJS UI engine elements." 
+    },
+    { 
+      name: "Cinematic Thumbnail Kit Pro", 
+      img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600", 
+      price: "Free", 
+      desc: "High conversion dynamic structural assets graphics." 
+    }
+  ];
+
+  let sliderImages = [
+    "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2c18234c7_1779296326231-01.jpeg", 
+    "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/ffabcf75f_1779295535236-01.jpeg", 
+    "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/82db22cae_1779322291378-01.jpeg"  
+  ];
+
+  let profileAvatar = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/6aea63a71_IMG_20260520_205716.jpg";
+  let welcomePopupImgUrl = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2a81ce957_5d8a3b6a20467cccfd95843d2f5d433c.jpg";
+
+  let currentCodeSnippet = `// Nexus Portal Mainframe Engine Grid Initializer\nexport default function InitializePortal() {\n  console.log("Transmission Buffer Online");\n}`;
+
+  const sidebarMenu = document.getElementById("sidebarMenu");
+  const menuOverlay = document.getElementById("menuOverlay");
+  const openMenuBtn = document.getElementById("openMenuBtn");
+  const closeMenuBtn = document.getElementById("closeMenuBtn");
+
+  function openSidebar() {
+    sidebarMenu.classList.add("open");
+    menuOverlay.classList.add("visible");
+  }
+
+  function closeSidebar() {
+    sidebarMenu.classList.remove("open");
+    menuOverlay.classList.remove("visible");
+  }
+
+  openMenuBtn.addEventListener("click", openSidebar);
+  closeMenuBtn.addEventListener("click", closeSidebar);
+  menuOverlay.addEventListener("click", closeSidebar);
+
+  function createParticles() {
+    const container = document.getElementById("particle-container");
+    const particleCount = 45;
+    
+    for (let i = 0; i < particleCount; i++) {
+      setTimeout(() => {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        
+        const size = Math.random() * 4 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${Math.random() * 100}vw`;
+        
+        const duration = Math.random() * 5 + 4;
+        particle.style.animationDuration = `${duration}s`;
+        
+        container.appendChild(particle);
+        
+        particle.addEventListener("animationend", () => {
+          particle.remove();
+          createSingleParticle();
+        });
+      }, Math.random() * 8000);
+    }
+  }
+
+  function createSingleParticle() {
+    const container = document.getElementById("particle-container");
+    if(!container) return;
+    const particle = document.createElement("div");
+    particle.className = "particle";
+    const size = Math.random() * 4 + 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.left = `${Math.random() * 100}vw`;
+    const duration = Math.random() * 5 + 4;
+    particle.style.animationDuration = `${duration}s`;
+    container.appendChild(particle);
+    
+    particle.addEventListener("animationend", () => {
+      particle.remove();
+      createSingleParticle();
+    });
+  }
+
+  function loadSavedData() {
+    if(localStorage.getItem("n_fl")) downloadFiles = JSON.parse(localStorage.getItem("n_fl"));
+    if(localStorage.getItem("n_st")) storeItems = JSON.parse(localStorage.getItem("n_st"));
+    if(localStorage.getItem("n_cd")) currentCodeSnippet = localStorage.getItem("n_cd");
+    if(localStorage.getItem("n_sl")) sliderImages = JSON.parse(localStorage.getItem("n_sl"));
+    if(localStorage.getItem("n_av")) profileAvatar = localStorage.getItem("n_av");
+    if(localStorage.getItem("n_pimg")) welcomePopupImgUrl = localStorage.getItem("n_pimg");
+    
+    const activeTheme = localStorage.getItem("portal_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", activeTheme);
+    updateThemeUIElements(activeTheme);
+
+    renderDashboardHub();
+  }
+
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  themeToggleBtn.addEventListener("click", () => {
+    let currentTheme = document.documentElement.getAttribute("data-theme");
+    let targetTheme = (currentTheme === "dark") ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", targetTheme);
+    localStorage.setItem("portal_theme", targetTheme);
+    updateThemeUIElements(targetTheme);
+    showToast(`THEME COMPLIANCE: ${targetTheme.toUpperCase()} MODE.`);
+  });
+
+  function updateThemeUIElements(theme) {
+    const icon = document.getElementById("themeIcon");
+    icon.className = (theme === "light") ? "fas fa-sun" : "fas fa-moon";
+  }
+
+  function renderFiles(filterText = "") {
+    const box = document.getElementById("filesContainer");
+    if(!box) return;
+    const filtered = downloadFiles.filter(f => f.name.toLowerCase().includes(filterText.toLowerCase()));
+    if(filtered.length === 0) { box.innerHTML = `<p style='color:var(--text-muted);'>No files found.</p>`; return; }
+
+    box.innerHTML = filtered.map(f => {
+      // Setup Video Button logic if URL exists
+      const videoBtnHtml = (f.videoUrl && f.videoUrl.trim() !== "") 
+        ? `<a href="${escapeHtml(f.videoUrl)}" target="_blank" class="card-btn yt-btn"><i class="fab fa-youtube"></i> WATCH VIDEO</a>` 
+        : "";
+
+      return `
+        <div class="premium-card">
+          <div>
+            <img src="${escapeHtml(f.img || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600')}" class="card-banner-img" alt="Asset Image">
+            <div class="badge-container">
+              <span class="meta-badge type-badge">${escapeHtml(f.type || 'DATA')}</span>
+              <span class="meta-badge">${escapeHtml(f.size || 'N/A')}</span>
+            </div>
+            <h3>${escapeHtml(f.name)}</h3>
+            <p>Verified Source Pack Bundle Core Sequence Asset.</p>
+          </div>
+          <div class="card-btn-group">
+            ${videoBtnHtml}
+            <button onclick="handleDownloadAction('${escapeHtml(f.url)}')" class="card-btn">DOWNLOAD  <i class="fas fa-download"></i></button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderStore(filterText = "") {
+    const box = document.getElementById("storeContainer");
+    if(!box) return;
+    const filtered = storeItems.filter(item => item.name.toLowerCase().includes(filterText.toLowerCase()));
+    if(filtered.length === 0) { box.innerHTML = `<p style='color:var(--text-muted);'>No products found.</p>`; return; }
+
+    box.innerHTML = filtered.map(item => `
+      <div class="premium-card">
+        <div>
+          <img src="${escapeHtml(item.img || 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600')}" class="store-banner-img" alt="Product Image">
+          <div class="badge-container">
+            <span class="meta-badge price-badge">${escapeHtml(item.price)}</span>
+          </div>
+          <h3>${escapeHtml(item.name)}</h3>
+          <p>${escapeHtml(item.desc)}</p>
+        </div>
+        <button class="card-btn">BUY</button>
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("vaultSearch").addEventListener("input", (e) => renderFiles(e.target.value));
+  document.getElementById("storeSearch").addEventListener("input", (e) => renderStore(e.target.value));
+
+  function renderCodeSnippet() {
+    const container = document.getElementById("codeBlockContainer");
+    if(!container) return;
+    container.innerHTML = `<div class="code-block"><button class="copy-code-btn" id="copyCodeTrigger"><i class="far fa-copy"></i> COPY</button><pre><code>${escapeHtml(currentCodeSnippet)}</code></pre></div>`;
+    document.getElementById("copyCodeTrigger").onclick = () => {
+      navigator.clipboard.writeText(currentCodeSnippet); showToast("✓ CAPTURED TO BUFFER");
+    };
+  }
+
+  function renderSlider() {
+    const sliderDiv = document.getElementById("slider");
+    if(sliderDiv && sliderImages.length === 3) {
+      sliderDiv.innerHTML = sliderImages.map(img => `<div class="slide" style="background-image: url('${escapeHtml(img)}');"></div>`).join("");
+      let index = 0;
+      if(sliderDiv.loopEngine) clearInterval(sliderDiv.loopEngine);
+      sliderDiv.loopEngine = setInterval(() => {
+        index = (index + 1) % 3;
+        sliderDiv.style.transform = `translateX(-${index * 100}%)`;
+      }, 4000);
+    }
+  }
+
+  /* ---- [RENDER ADMIN DELETE LISTS] ---- */
+  function renderAdminManagementLists() {
+    const adminFilesList = document.getElementById("adminFilesList");
+    const adminStoreList = document.getElementById("adminStoreList");
+
+    if(adminFilesList) {
+      adminFilesList.innerHTML = downloadFiles.map((f, index) => `
+        <div class="admin-list-item">
+          <span>${escapeHtml(f.name)}</span>
+          <button class="delete-item-btn" onclick="deleteFileAsset(${index})"><i class="fas fa-trash"></i> Delete Pack</button>
+        </div>
+      `).join("");
+    }
+
+    if(adminStoreList) {
+      adminStoreList.innerHTML = storeItems.map((item, index) => `
+        <div class="admin-list-item">
+          <span>${escapeHtml(item.name)} (${escapeHtml(item.price)})</span>
+          <button class="delete-item-btn" onclick="deleteStoreAsset(${index})"><i class="fas fa-trash"></i> Remove</button>
+        </div>
+      `).join("");
+    }
+  }
+
+  /* ---- [DELETE ACTIONS] ---- */
+  window.deleteFileAsset = function(index) {
+    if(confirm(`Are you sure you want to delete "${downloadFiles[index].name}"?`)) {
+      downloadFiles.splice(index, 1);
+      localStorage.setItem("n_fl", JSON.stringify(downloadFiles));
+      renderFiles();
+      renderAdminManagementLists();
+      showToast("VAULT ARCHIVE REMOVED.");
+    }
+  };
+
+  window.deleteStoreAsset = function(index) {
+    if(confirm(`Are you sure you want to delete "${storeItems[index].name}"?`)) {
+      storeItems.splice(index, 1);
+      localStorage.setItem("n_st", JSON.stringify(storeItems));
+      renderStore();
+      renderAdminManagementLists();
+      showToast("STORE PROVISION REMOVED.");
+    }
+  };
+
+  function renderDashboardHub() {
+    renderFiles(); renderStore(); renderCodeSnippet(); renderSlider();
+    document.getElementById("homeAvatarImg").src = profileAvatar;
+    document.getElementById("welcomePopupImg").src = welcomePopupImgUrl;
+    renderAdminManagementLists();
+  }
+
+  function handleDownloadAction(url) {
+    if(url && url !== "#") window.open(url, "_blank");
+    else showToast("Simulation Protocol Link Active.");
+  }
+
+  // HTML ESCAPE SCRIPT
+  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<> "']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'} [m])); }
+  
+  function showToast(msg) {
+    let old = document.querySelector(".toast-msg"); if(old) old.remove();
+    let t = document.createElement("div"); t.className = "toast-msg"; t.innerText = msg;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+  }
+
+  let authenticated = false;
+  function refreshConsoleUI() {
+    document.getElementById("adminLoginPanel").style.display = authenticated ? "none" : "block";
+    document.getElementById("adminDashboardPanel").style.display = authenticated ? "block" : "none";
+    if(authenticated) {
+      document.getElementById("imgUrl1").value = sliderImages[0] || '';
+      document.getElementById("imgUrl2").value = sliderImages[1] || '';
+      document.getElementById("imgUrl3").value = sliderImages[2] || '';
+      document.getElementById("codeSnippetInput").value = currentCodeSnippet;
+      document.getElementById("newAvatarUrl").value = profileAvatar;
+      document.getElementById("newPopupImgUrl").value = welcomePopupImgUrl;
+      renderAdminManagementLists();
+    }
+  }
+
+  document.getElementById("adminAuthBtn").onclick = () => {
+    if(document.getElementById("adminPassInput").value === "1234567899") {
+      authenticated = true; refreshConsoleUI(); showToast("ACCESS GRANTED.");
+    } else showToast("IDENTIFICATION REJECTED.");
+  };
+
+  document.getElementById("addFileBtn").onclick = () => {
+    const name = document.getElementById("newFileName").value.trim();
+    const img = document.getElementById("newFileImg").value.trim();
+    const url = document.getElementById("newFileUrl").value.trim();
+    const videoUrl = document.getElementById("newFileVideoUrl").value.trim();
+    const size = document.getElementById("newFileSize").value.trim() || "N/A";
+    const type = document.getElementById("newFileType").value.trim() || "DATA";
+    
+    if(name && url) {
+      downloadFiles.push({ name, img, url, videoUrl, size, type });
+      localStorage.setItem("n_fl", JSON.stringify(downloadFiles)); 
+      renderFiles();
+      renderAdminManagementLists();
+      showToast("VAULT ARCHIVE FILE INTEGRATED.");
+      
+      // Reset Fields
+      document.getElementById("newFileName").value = ""; 
+      document.getElementById("newFileImg").value = ""; 
+      document.getElementById("newFileUrl").value = ""; 
+      document.getElementById("newFileVideoUrl").value = "";
+      document.getElementById("newFileSize").value = ""; 
+      document.getElementById("newFileType").value = "";
+    }
+  };
+
+  document.getElementById("addStoreItemBtn").onclick = () => {
+    const name = document.getElementById("newItemName").value.trim();
+    const img = document.getElementById("newItemImg").value.trim();
+    const price = document.getElementById("newItemPrice").value.trim();
+    const desc = document.getElementById("newItemDesc").value.trim();
+    if(name && price) {
+      storeItems.push({ name, img, price, desc: desc || "Premium Asset Product." });
+      localStorage.setItem("n_st", JSON.stringify(storeItems)); renderStore();
+      renderAdminManagementLists();
+      showToast("COMMERCE OBJECT INSTANTIATED.");
+      document.getElementById("newItemName").value = ""; document.getElementById("newItemImg").value = ""; document.getElementById("newItemPrice").value = ""; document.getElementById("newItemDesc").value = "";
+    }
+  };
+
+  document.getElementById("updateAvatarBtn").onclick = () => {
+    const avUrl = document.getElementById("newAvatarUrl").value.trim();
+    if(avUrl) {
+      profileAvatar = avUrl; localStorage.setItem("n_av", profileAvatar);
+      document.getElementById("homeAvatarImg").src = profileAvatar; showToast("AVATAR ALIGNED.");
+    }
+  };
+
+  document.getElementById("updateCodeBtn").onclick = () => {
+    currentCodeSnippet = document.getElementById("codeSnippetInput").value;
+    localStorage.setItem("n_cd", currentCodeSnippet); renderCodeSnippet(); showToast("CODE RE-MAPPED.");
+  };
+
+  document.getElementById("updateSliderBtn").onclick = () => {
+    const u1 = document.getElementById("imgUrl1").value.trim();
+    const u2 = document.getElementById("imgUrl2").value.trim();
+    const u3 = document.getElementById("imgUrl3").value.trim();
+    if(u1 && u2 && u3) {
+      sliderImages = [u1, u2, u3]; localStorage.setItem("n_sl", JSON.stringify(sliderImages));
+      renderSlider(); showToast("SLIDER OPTICS UPDATED.");
+    }
+  };
+
+  document.getElementById("updatePopupImgBtn").onclick = () => {
+    const pUrl = document.getElementById("newPopupImgUrl").value.trim();
+    if(pUrl) {
+      welcomePopupImgUrl = pUrl; localStorage.setItem("n_pimg", welcomePopupImgUrl);
+      document.getElementById("welcomePopupImg").src = welcomePopupImgUrl; showToast("WELCOME IMAGE UPDATED.");
+    }
+  };
+
+  document.getElementById("verifyUnlockBtn").onclick = () => {
+    document.getElementById("gatekeeper").classList.add("hide");
+    document.getElementById("mainApp").classList.add("visible");
+    
+    setTimeout(() => {
+      document.getElementById("welcomePopup").classList.add("show");
+    }, 400);
+    
+    showToast("WELCOME BACK COMMANDER.");
+  };
+
+  function closeWelcomePopup() {
+    document.getElementById("welcomePopup").classList.remove("show");
+  }
+  document.getElementById("closeWelcomePopupBtn").onclick = closeWelcomePopup;
+  document.getElementById("continueWelcomeBtn").onclick = closeWelcomePopup;
+
+  const navLinks = document.querySelectorAll(".nav-links a");
+  navLinks.forEach(link => {
+    link.onclick = () => {
+      navLinks.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+      const target = link.getAttribute("data-section");
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+      document.getElementById(`${target}Section`).classList.add("active-section");
+      
+      closeSidebar();
+      if(target === "adminlogin") refreshConsoleUI();
+    };
+  });
+
+  window.onload = () => {
+    setTimeout(() => { document.getElementById("preloader").classList.add("hide"); }, 2000);
+    loadSavedData();
+    createParticles();
+  };
+</script>
+</body>
+  </html>
