@@ -6,7 +6,7 @@
   <title>Fixo Modz</title>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;600;700&family=Space+Grotesk:wght=400;500;700&display=swap" rel="stylesheet">
   
   <style>
     /* ---- [RESET & VARIABLES] ---- */
@@ -334,7 +334,7 @@
 
     /* CODE CONTAINER STYLE */
     .code-wrapper { background: #050507; border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem; position: relative; }
-    .code-block pre { overflow-x: auto; font-family: monospace; color: #A4F4B3; line-height: 1.6; }
+    .code-block pre { overflow-x: auto; font-family: monospace; color: #A4F4B3; line-height: 1.6; whitespace: pre-wrap; }
     .copy-code-btn { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; }
 
     /* ---- [ADMIN PANEL DESIGN] ---- */
@@ -430,7 +430,7 @@
   <div>
     <div class="sidebar-header">
       <div class="nav-logo">◈ FIXO <span>MODZ</span></div>
-      <button class="close-menu-btn" id="closeMenuBtn"><i class="fas fa-xmark"></i></button>
+      <button class="close-menu-btn" id="closeMenuBtnInner"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="nav-links">
       <a data-section="home" class="active"><i class="fas fa-house"></i> <span>Home</span></a>
@@ -583,7 +583,8 @@
 </div>
 
 <script>
-  let downloadFiles = [
+  // DEFAULT DATA SETS
+  const defaultFiles = [
     { 
       name: "System Boilerplate Core V3.zip", 
       img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600", 
@@ -604,7 +605,7 @@
     }
   ];
 
-  let storeItems = [
+  const defaultStore = [
     { 
       name: "Cyberpunk UI Framework Blueprint", 
       img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600", 
@@ -619,21 +620,28 @@
     }
   ];
 
-  let sliderImages = [
+  const defaultSlider = [
     "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2c18234c7_1779296326231-01.jpeg", 
     "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/ffabcf75f_1779295535236-01.jpeg", 
     "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/82db22cae_1779322291378-01.jpeg"  
   ];
 
-  let profileAvatar = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/6aea63a71_IMG_20260520_205716.jpg";
-  let welcomePopupImgUrl = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2a81ce957_5d8a3b6a20467cccfd95843d2f5d433c.jpg";
+  const defaultAvatar = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/6aea63a71_IMG_20260520_205716.jpg";
+  const defaultPopup = "https://base44.app/api/apps/6a0de0a390b05b803d09252d/files/mp/public/6a0de0a390b05b803d09252d/2a81ce957_5d8a3b6a20467cccfd95843d2f5d433c.jpg";
+  const defaultCode = `// Nexus Portal Mainframe Engine Grid Initializer\nexport default function InitializePortal() {\n  console.log("Transmission Buffer Online");\n}`;
 
-  let currentCodeSnippet = `// Nexus Portal Mainframe Engine Grid Initializer\nexport default function InitializePortal() {\n  console.log("Transmission Buffer Online");\n}`;
+  // LIVE RUNTIME VARIABLES
+  let downloadFiles = [];
+  let storeItems = [];
+  let sliderImages = [];
+  let profileAvatar = "";
+  let welcomePopupImgUrl = "";
+  let currentCodeSnippet = "";
 
   const sidebarMenu = document.getElementById("sidebarMenu");
   const menuOverlay = document.getElementById("menuOverlay");
   const openMenuBtn = document.getElementById("openMenuBtn");
-  const closeMenuBtn = document.getElementById("closeMenuBtn");
+  const closeMenuBtnInner = document.getElementById("closeMenuBtnInner");
 
   function openSidebar() {
     sidebarMenu.classList.add("open");
@@ -646,7 +654,7 @@
   }
 
   openMenuBtn.addEventListener("click", openSidebar);
-  closeMenuBtn.addEventListener("click", closeSidebar);
+  closeMenuBtnInner.addEventListener("click", closeSidebar);
   menuOverlay.addEventListener("click", closeSidebar);
 
   function createParticles() {
@@ -696,13 +704,22 @@
   }
 
   function loadSavedData() {
-    if(localStorage.getItem("n_fl")) downloadFiles = JSON.parse(localStorage.getItem("n_fl"));
-    if(localStorage.getItem("n_st")) storeItems = JSON.parse(localStorage.getItem("n_st"));
-    if(localStorage.getItem("n_cd")) currentCodeSnippet = localStorage.getItem("n_cd");
-    if(localStorage.getItem("n_sl")) sliderImages = JSON.parse(localStorage.getItem("n_sl"));
-    if(localStorage.getItem("n_av")) profileAvatar = localStorage.getItem("n_av");
-    if(localStorage.getItem("n_pimg")) welcomePopupImgUrl = localStorage.getItem("n_pimg");
+    // FIX: Fallback to default if localstorage is empty
+    downloadFiles = localStorage.getItem("n_fl") ? JSON.parse(localStorage.getItem("n_fl")) : defaultFiles;
+    storeItems = localStorage.getItem("n_st") ? JSON.parse(localStorage.getItem("n_st")) : defaultStore;
+    sliderImages = localStorage.getItem("n_sl") ? JSON.parse(localStorage.getItem("n_sl")) : defaultSlider;
+    currentCodeSnippet = localStorage.getItem("n_cd") ? localStorage.getItem("n_cd") : defaultCode;
+    profileAvatar = localStorage.getItem("n_av") ? localStorage.getItem("n_av") : defaultAvatar;
+    welcomePopupImgUrl = localStorage.getItem("n_pimg") ? localStorage.getItem("n_pimg") : defaultPopup;
     
+    // Save defaults to storage immediately if first time
+    if(!localStorage.getItem("n_fl")) localStorage.setItem("n_fl", JSON.stringify(downloadFiles));
+    if(!localStorage.getItem("n_st")) localStorage.setItem("n_st", JSON.stringify(storeItems));
+    if(!localStorage.getItem("n_sl")) localStorage.setItem("n_sl", JSON.stringify(sliderImages));
+    if(!localStorage.getItem("n_cd")) localStorage.setItem("n_cd", currentCodeSnippet);
+    if(!localStorage.getItem("n_av")) localStorage.setItem("n_av", profileAvatar);
+    if(!localStorage.getItem("n_pimg")) localStorage.setItem("n_pimg", welcomePopupImgUrl);
+
     const activeTheme = localStorage.getItem("portal_theme") || "dark";
     document.documentElement.setAttribute("data-theme", activeTheme);
     updateThemeUIElements(activeTheme);
@@ -731,8 +748,7 @@
     const filtered = downloadFiles.filter(f => f.name.toLowerCase().includes(filterText.toLowerCase()));
     if(filtered.length === 0) { box.innerHTML = `<p style='color:var(--text-muted);'>No files found.</p>`; return; }
 
-    box.innerHTML = filtered.map(f => {
-      // Setup Video Button logic if URL exists
+    box.innerHTML = filtered.map((f, i) => {
       const videoBtnHtml = (f.videoUrl && f.videoUrl.trim() !== "") 
         ? `<a href="${escapeHtml(f.videoUrl)}" target="_blank" class="card-btn yt-btn"><i class="fab fa-youtube"></i> WATCH VIDEO</a>` 
         : "";
@@ -750,7 +766,7 @@
           </div>
           <div class="card-btn-group">
             ${videoBtnHtml}
-            <button onclick="handleDownloadAction('${escapeHtml(f.url)}')" class="card-btn">DOWNLOAD  <i class="fas fa-download"></i></button>
+            <button onclick="handleDownloadAction(${i})" class="card-btn">DOWNLOAD  <i class="fas fa-download"></i></button>
           </div>
         </div>
       `;
@@ -784,7 +800,9 @@
   function renderCodeSnippet() {
     const container = document.getElementById("codeBlockContainer");
     if(!container) return;
-    container.innerHTML = `<div class="code-block"><button class="copy-code-btn" id="copyCodeTrigger"><i class="far fa-copy"></i> COPY</button><pre><code>${escapeHtml(currentCodeSnippet)}</code></pre></div>`;
+    // FIX: Use accurate conversion for rendering in code block element safely
+    container.innerHTML = `<div class="code-block"><button class="copy-code-btn" id="copyCodeTrigger"><i class="far fa-copy"></i> COPY</button><pre><code id="codeRenderArea"></code></pre></div>`;
+    document.getElementById("codeRenderArea").textContent = currentCodeSnippet;
     document.getElementById("copyCodeTrigger").onclick = () => {
       navigator.clipboard.writeText(currentCodeSnippet); showToast("✓ CAPTURED TO BUFFER");
     };
@@ -792,8 +810,8 @@
 
   function renderSlider() {
     const sliderDiv = document.getElementById("slider");
-    if(sliderDiv && sliderImages.length === 3) {
-      sliderDiv.innerHTML = sliderImages.map(img => `<div class="slide" style="background-image: url('${escapeHtml(img)}');"></div>`).join("");
+    if(sliderDiv && sliderImages.length >= 3) {
+      sliderDiv.innerHTML = sliderImages.slice(0,3).map(img => `<div class="slide" style="background-image: url('${escapeHtml(img)}');"></div>`).join("");
       let index = 0;
       if(sliderDiv.loopEngine) clearInterval(sliderDiv.loopEngine);
       sliderDiv.loopEngine = setInterval(() => {
@@ -803,7 +821,6 @@
     }
   }
 
-  /* ---- [RENDER ADMIN DELETE LISTS] ---- */
   function renderAdminManagementLists() {
     const adminFilesList = document.getElementById("adminFilesList");
     const adminStoreList = document.getElementById("adminStoreList");
@@ -827,7 +844,6 @@
     }
   }
 
-  /* ---- [DELETE ACTIONS] ---- */
   window.deleteFileAsset = function(index) {
     if(confirm(`Are you sure you want to delete "${downloadFiles[index].name}"?`)) {
       downloadFiles.splice(index, 1);
@@ -855,13 +871,21 @@
     renderAdminManagementLists();
   }
 
-  function handleDownloadAction(url) {
-    if(url && url !== "#") window.open(url, "_blank");
-    else showToast("Simulation Protocol Link Active.");
+  // FIX: Safe indexing download logic trigger
+  window.handleDownloadAction = function(index) {
+    const targetAsset = downloadFiles[index];
+    if(targetAsset && targetAsset.url !== "#" && targetAsset.url !== "") {
+       window.open(targetAsset.url, "_blank");
+    } else {
+       showToast("Simulation Protocol Link Active.");
+    }
   }
 
-  // HTML ESCAPE SCRIPT
-  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<> "']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'} [m])); }
+  // FIX: Accurate character encoding mapping bypass
+  function escapeHtml(str) { 
+    if(!str) return ''; 
+    return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); 
+  }
   
   function showToast(msg) {
     let old = document.querySelector(".toast-msg"); if(old) old.remove();
@@ -906,7 +930,6 @@
       renderAdminManagementLists();
       showToast("VAULT ARCHIVE FILE INTEGRATED.");
       
-      // Reset Fields
       document.getElementById("newFileName").value = ""; 
       document.getElementById("newFileImg").value = ""; 
       document.getElementById("newFileDesc").value = "";
@@ -914,6 +937,8 @@
       document.getElementById("newFileVideoUrl").value = "";
       document.getElementById("newFileSize").value = ""; 
       document.getElementById("newFileType").value = "";
+    } else {
+      alert("Please provide at least a Title and Redirect URL.");
     }
   };
 
@@ -924,10 +949,13 @@
     const desc = document.getElementById("newItemDesc").value.trim();
     if(name && price) {
       storeItems.push({ name, img, price, desc: desc || "Premium Asset Product." });
-      localStorage.setItem("n_st", JSON.stringify(storeItems)); renderStore();
+      localStorage.setItem("n_st", JSON.stringify(storeItems)); 
+      renderStore();
       renderAdminManagementLists();
       showToast("COMMERCE OBJECT INSTANTIATED.");
       document.getElementById("newItemName").value = ""; document.getElementById("newItemImg").value = ""; document.getElementById("newItemPrice").value = ""; document.getElementById("newItemDesc").value = "";
+    } else {
+      alert("Please provide at least a Product Name and Price.");
     }
   };
 
@@ -1000,4 +1028,4 @@
   };
 </script>
 </body>
-</html>
+  </html>
